@@ -5,13 +5,9 @@ import { Bookmark, Braces, Code2, RotateCcw } from "lucide-react";
 const axios = require("axios");
 
 const CodeSection = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState("cpp");
   const [submissionToken, setSubmissionToken] = useState(null);
-  const [code, setCode] = useState(`def print_multiplication_table_of_2():
-  for i in range(1, 11):
-      print(f"2 x {i} = {2*i}")
-
-print_multiplication_table_of_2()
+  const [code, setCode] =
+    useState(`#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your C++ code here\n    return 0;\n}
 `);
 
   function handleEditorChange(value, event) {
@@ -22,18 +18,15 @@ print_multiplication_table_of_2()
     setCode("");
   };
 
-  const [selectedValue, setSelectedValue] = useState("cpp"); // State to store the selected value
-
-  const handleSelectChange = (e) => {
-    setSelectedLanguage(e.target.value); // Update the selected language based on selection
-    console.log(selectedLanguage);
-  };
-
   const createSubmission = async () => {
     let token = "";
     try {
       const languageIdMap = {
-        cpp: 71,
+        cpp: 53,
+        python: 70,
+        javascript: 63,
+        java: 62,
+        // Add more language IDs as needed
       };
 
       const options = {
@@ -64,7 +57,7 @@ print_multiplication_table_of_2()
         getSubmissionOutput();
       }
     } catch (error) {
-      console.error("Submission failed:", error.response);
+      console.log("Submission failed:", error.response);
     }
   };
 
@@ -96,6 +89,25 @@ print_multiplication_table_of_2()
     getSubmissionOutput();
   }, [submissionToken]);
 
+  const [selectedLanguage, setSelectedLanguage] = useState("cpp"); // State variable to store selected language
+  const [isOpen, setIsOpen] = useState(false); // State variable to manage dropdown visibility
+  console.log(selectedLanguage);
+  const handleSelectLanguage = (language) => {
+    setSelectedLanguage(language);
+    setIsOpen(false); // Close the dropdown after selecting a language
+
+    // Define a map of languages to default code snippets
+    const defaultCodeMap = {
+      cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your C++ code here\n    return 0;\n}`,
+      java: `public class Main {\n    public static void main(String[] args) {\n        // Your Java code here\n    }\n}`,
+      python: `print("hello world")`,
+      javascript: `console.log("hello world")`,
+    };
+
+    // Set the default code for the selected language
+    setCode(defaultCodeMap[language]);
+  };
+
   return (
     <main className="w-full h-[93.15vh] flex justify-around bg-black p-1">
       <div className="w-[39%] h-full  bg-[#1E1E1E] border border-[#666] rounded-[12px]"></div>
@@ -105,15 +117,28 @@ print_multiplication_table_of_2()
           <p className="text-[white] text-[15px] font-medium">Code</p>
         </div>
         <div className="w-full h-9 bg-[#1E1E1E] border-b border-[#666] flex justify-between px-4 items-center">
-          <select
-            value={selectedValue}
-            className="px-2 py-1 text-white bg-[#333]"
-            onChange={handleSelectChange}
-          >
-            <option value="cpp">c++</option>
-            <option value="python">python</option>
-            <option value="java">java</option>
-          </select>
+          <div className="dropdown">
+            <button
+              className="text-white px-2 py-1 bg-purple-600"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {selectedLanguage ? selectedLanguage : "cpp"}
+            </button>
+            {isOpen && (
+              <div className="flex flex-col absolute z-50 bg-[#333] text-white px-4 py-2">
+                <button onClick={() => handleSelectLanguage("cpp")}>c++</button>
+                <button onClick={() => handleSelectLanguage("java")}>
+                  java
+                </button>
+                <button onClick={() => handleSelectLanguage("python")}>
+                  python
+                </button>
+                <button onClick={() => handleSelectLanguage("javascript")}>
+                  javaScript
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex gap-3 text-white">
             <Bookmark size={20} />
             <Braces size={20} />
@@ -135,7 +160,7 @@ print_multiplication_table_of_2()
           theme={"vs-dark"}
           height={"75vh"}
           onChange={handleEditorChange}
-          defaultLanguage="python"
+          defaultLanguage={`${selectedLanguage}`}
           defaultValue={``}
         />
         <div className="w-full h-10 rounded-b-[10px] bg-[#1E1E1E] px-4">
